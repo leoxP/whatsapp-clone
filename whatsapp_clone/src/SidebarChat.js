@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./SidebarChat.css";
 import { Avatar } from "@mui/material";
 
-function SidebarChat() {
+function SidebarChat(addNewChat) {
     const [seed, setSeed] = useState(""); /*Initial state of seed */
            /* variable,function */
 
@@ -16,14 +16,25 @@ function SidebarChat() {
         marginTop: '15px',  // Adjust the value as needed
         marginRight: '15px'
     };
+
+    const createChat=()=>{
+        const roomName=prompt("Please enter name for chat")
+        if(roomName){
+            //do some stuff
+        }
+    };
     
-    return (
+    return !addNewChat ?(
         <div className="sidebarChat">
             <Avatar style={avatarStyle} src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`} />
             <div className="sidebarChat__info">
                 <h3>Room name</h3>
                 <p>Last message...</p>
             </div>
+        </div>
+    ): (
+        <div onClick={createChat} className="sidebarChat">
+            <h3>Add new Chat</h3>
         </div>
     );
 }
