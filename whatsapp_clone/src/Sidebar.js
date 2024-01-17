@@ -6,7 +6,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { SearchOutlined } from "@mui/icons-material";
 import SidebarChat from "./SidebarChat";
-import { doc, setDoc, collection,onSnapshot} from "firebase/firestore";
+import { collection,onSnapshot} from "firebase/firestore";
 import { db } from "./firebase";
 
 function Sidebar() {
@@ -14,7 +14,7 @@ function Sidebar() {
   const [rooms,setRooms]=useState([]);
 
   useEffect(() => {
-    onSnapshot(collection(db, 'rooms'), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, 'rooms'), (snapshot) => {
       setRooms(
         snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -23,20 +23,10 @@ function Sidebar() {
       );
     });
 
-    //return () => unsubscribe();
-  }, []);
-
-  /*
-  const addNewRoom = async () => {
-    // Prompt the user for the new room name (you can use your UI for this)
-    const newRoomName = prompt("Enter the name for the new room:");
-
-    if (newRoomName) {
-      // Add a new room document to the 'rooms' collection
-      await setDoc(doc(collection(db, 'rooms')), { name: newRoomName });
+    return()=>{
+      unsubscribe(); //detaches real time listener after usage
     }
-  };
-  */
+  }, []);
   
   return (
     <div className="sidebar">
