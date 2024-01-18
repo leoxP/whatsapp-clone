@@ -4,16 +4,24 @@ import { Button } from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
 import { auth, provider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
+import { useStateValue } from "./StateProvider";
+import { actionTypes } from "./reducer";
 
 function Login() {
-    const signIn = async () => {
-        try {
-          const result = await signInWithPopup(auth, provider);
-          console.log(result);
-        } catch (error) {
-          alert(error.message);
-        }
-      };
+  const [, dispatch] = useStateValue();
+
+  const signIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+
+      dispatch({
+        type: actionTypes.SET_USER,
+        user: result.user,
+      }); 
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   return (
     <div className="login">
