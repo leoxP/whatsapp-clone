@@ -8,19 +8,36 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import MicIcon from "@mui/icons-material/Mic";
+import { useParams } from "react-router-dom";
+import { collection, doc, onSnapshot } from "firebase/firestore";
+import { db } from "./firebase";
 
 function Chat() {
-    const [input, setInput]=useState("");
+  const [input, setInput] = useState("");
   const [seed, setSeed] = useState("");
+  const { roomId } = useParams();
+  const [roomName, setRoomName] = useState("");
+
+  useEffect(() => {
+    if (roomId) {
+      const roomDocRef = doc(db, 'rooms', roomId);
+      
+      const unsubscribe = onSnapshot(roomDocRef, (snapshot) => {
+        setRoomName(snapshot.data().name);
+      });
+  
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [roomId]);
 
   useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
-  }, []);
+  }, [roomId]);
 
   const sendMessage = (e) => {
-    e.preventDefault(); 
-    console.log('You typed >>>',input);
-
+    e.preventDefault();
     setInput("");
   };
 
@@ -31,7 +48,7 @@ function Chat() {
           src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`}
         />
         <div className="chat__headerInfo">
-          <h3>Room name</h3>
+          <h3>{roomName}</h3>
           <p>Last seen at...</p>
         </div>
         <div className="chat__headerRight">
@@ -57,7 +74,12 @@ function Chat() {
       <div className="chat__footer">
         <InsertEmoticon />
         <form>
-          <input value={input} onChange={(e)=>setInput(e.target.value)} placeholder=" Type a message" type="text" />
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder=" Type a message"
+            type="text"
+          />
           <button onClick={sendMessage} type="submit">
             Send a message
           </button>

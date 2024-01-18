@@ -3,6 +3,7 @@ import "./SidebarChat.css";
 import { Avatar } from "@mui/material";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "./firebase";
+import { Link } from "react-router-dom";
 
 function SidebarChat({ id, addNewChat, name }) {
   const [seed, setSeed] = useState(""); /*Initial state of seed */
@@ -32,6 +33,7 @@ function SidebarChat({ id, addNewChat, name }) {
   };
 
   return !addNewChat ? (
+    <Link to={`/rooms/${id}`} style={{ textDecoration: 'none' }}>
     <div className="sidebarChat">
       <Avatar
         style={avatarStyle}
@@ -42,6 +44,7 @@ function SidebarChat({ id, addNewChat, name }) {
         <p>Last message...</p>
       </div>
     </div>
+    </Link>
   ) : (
     <div onClick={createChat} className="sidebarChat">
       <h3>Add new Chat</h3>
