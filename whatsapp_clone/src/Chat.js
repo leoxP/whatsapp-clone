@@ -9,8 +9,15 @@ import {
 } from "@mui/icons-material";
 import MicIcon from "@mui/icons-material/Mic";
 import { useParams } from "react-router-dom";
-import { collection, doc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore"; 
 import { db } from "./firebase";
+import { useStateValue } from "./StateProvider";
 
 function Chat() {
   const [input, setInput] = useState("");
@@ -18,6 +25,7 @@ function Chat() {
   const { roomId } = useParams();
   const [roomName, setRoomName] = useState("");
   const [messages, setMessages] = useState([]);
+  const [user,] = useStateValue();
 
   useEffect(() => {
     if (roomId) {
@@ -30,7 +38,11 @@ function Chat() {
       const messagesCollection = collection(db, "rooms", roomId, "messages");
 
       onSnapshot(messagesCollection, (snapshot) => {
-        setMessages(snapshot.docs.map((doc) => doc.data()));
+        const messagesData = snapshot.docs.map((doc) => doc.data());
+        const sortedMessages = messagesData.sort(
+          (a, b) => a.timestamp - b.timestamp
+        );
+        setMessages(sortedMessages);
       });
 
       return () => {
@@ -40,13 +52,29 @@ function Chat() {
   }, [roomId]);
 
   useEffect(() => {
+    const chatBody = document.querySelector(".chat__body");
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }, [messages]);
+
+  useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
   }, [roomId]);
 
+  const addMessageToCollection = async () => {
+    const newMessage = {
+      message: input,
+      name: user.displayName,
+      timestamp: serverTimestamp(),
+    };
+
+    await addDoc(collection(db, "rooms", roomId, "messages"), newMessage);
+  };
+  
   const sendMessage = (e) => {
     e.preventDefault();
+    addMessageToCollection();
     setInput("");
-  };
+  }; 
 
   return (
     <div className="chat">
