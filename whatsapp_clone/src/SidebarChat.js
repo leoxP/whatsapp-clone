@@ -1,13 +1,42 @@
 import React, { useState, useEffect } from "react";
 import "./SidebarChat.css";
 import { Avatar } from "@mui/material";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, orderBy, query, limit, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 import { Link } from "react-router-dom";
 
 function SidebarChat({ id, addNewChat, name }) {
   const [seed, setSeed] = useState(""); /*Initial state of seed */
   /* variable,function */
+
+  const [lastMessage,setLastMessage]=useState("");
+
+  useEffect(() => {
+    const fetchLastMessage = async () => {
+      if (id) {
+        const messagesCollection = collection(db, "rooms", id, "messages");
+        const messagesQuery = query(messagesCollection, orderBy("timestamp", "desc"), limit(1));
+
+        try {
+          const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+            const lastMessageDoc = snapshot.docs[0];
+  
+            if (lastMessageDoc) {
+              setLastMessage(lastMessageDoc.data().message);
+            }
+          });
+
+          return () => {
+            unsubscribe(); // detaches real-time listener after usage
+          };
+        } catch (error) {
+          console.error("Error fetching last message: ", error);
+        }
+      }
+    };
+
+    fetchLastMessage();
+  }, [id]);
 
   /* Hook to generate random number */
   useEffect(() => {
@@ -33,7 +62,7 @@ function SidebarChat({ id, addNewChat, name }) {
   };
 
   return !addNewChat ? (
-    <Link to={`/rooms/${id}`} style={{ textDecoration: 'none' }}>
+    <Link to={`/rooms/${id}`} >
     <div className="sidebarChat">
       <Avatar
         style={avatarStyle}
@@ -41,7 +70,7 @@ function SidebarChat({ id, addNewChat, name }) {
       />
       <div className="sidebarChat__info">
         <h3>{addNewChat ? "Add new Chat" : name}</h3>
-        <p>Last message...</p>
+        <p>{lastMessage}</p>
       </div>
     </div>
     </Link>

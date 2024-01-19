@@ -84,7 +84,12 @@ function Chat() {
         />
         <div className="chat__headerInfo">
           <h3>{roomName}</h3>
-          <p>Last seen at...</p>
+          <p>Last Seen {" "}{
+            new Date(
+              messages[messages.length-1]?.timestamp?.toDate()
+            ).toLocaleString()
+          }
+          </p>
         </div>
         <div className="chat__headerRight">
           <IconButton>
@@ -101,11 +106,11 @@ function Chat() {
 
       <div className="chat__body">
         {messages.map((message) => (
-          <p className={`chat__message ${true && "chat__receiver"}`}>
+          <p className={`chat__message ${message.name===user.displayName && "chat__receiver"}`}>
             <span className="chat__name">{message.name}</span>
             {message.message}
             <span className="chat__timestamp">
-              {new Date(message.timestamp?.toDate()).toUTCString()}
+              {new Date(message.timestamp?.toDate()).toLocaleString()}
             </span>
           </p>
         ))}
