@@ -19,23 +19,25 @@ A WhatsApp clone built with React, Firebase, Material UI, React Router, React Co
    git clone https://github.com/your-username/whatsapp-clone.git
 
 2. Install dependencies.
+    ```bash
     cd whatsapp-clone
     npm install
 
 3. Set up Firebase configuration. (Use your own if you wish)
 
 4. Start the development server.
+    ```bash
     npm start
 
 ## Technologies Used
 
-React
-Firebase Firestore
-Material UI
-React Router
-React Context API
-Redux
-Google Authentication
+- React
+- Firebase Firestore
+- Material UI
+- React Router
+- React Context API
+- Redux
+- Google Authentication
 
 ## License
 
