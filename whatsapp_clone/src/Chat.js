@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./Chat.css";
 import { Avatar, IconButton } from "@mui/material";
 import {
@@ -15,6 +15,8 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
+  query,
+  orderBy,
 } from "firebase/firestore"; 
 import { db } from "./firebase";
 import { useStateValue } from "./StateProvider";
@@ -26,6 +28,7 @@ function Chat() {
   const [roomName, setRoomName] = useState("");
   const [messages, setMessages] = useState([]);
   const [user,] = useStateValue();
+  const chatBodyRef = useRef(null);
 
   useEffect(() => {
     if (roomId) {
@@ -36,29 +39,29 @@ function Chat() {
       });
 
       const messagesCollection = collection(db, "rooms", roomId, "messages");
+      const messagesQuery = query(messagesCollection, orderBy("timestamp"));
 
-      onSnapshot(messagesCollection, (snapshot) => {
+      const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
         const messagesData = snapshot.docs.map((doc) => doc.data());
-        const sortedMessages = messagesData.sort(
-          (a, b) => a.timestamp - b.timestamp
-        );
-        setMessages(sortedMessages);
+        setMessages(messagesData);
       });
 
       return () => {
         unsubscribe();
+        unsubscribeMessages();
       };
     }
   }, [roomId]);
 
   useEffect(() => {
-    const chatBody = document.querySelector(".chat__body");
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }, [messages]);
-
-  useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
   }, [roomId]);
+
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const addMessageToCollection = async () => {
     const newMessage = {
@@ -104,9 +107,9 @@ function Chat() {
         </div>
       </div>
 
-      <div className="chat__body">
-        {messages.map((message) => (
-          <p className={`chat__message ${message.name===user.displayName && "chat__receiver"}`}>
+      <div className="chat__body" ref={chatBodyRef}>
+        {messages.map((message, index) => (
+          <p key={index} className={`chat__message ${message.name === user.displayName && "chat__receiver"}`}>
             <span className="chat__name">{message.name}</span>
             {message.message}
             <span className="chat__timestamp">
